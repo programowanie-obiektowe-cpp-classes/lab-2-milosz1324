@@ -2,42 +2,35 @@
 #include "Resource.hpp"
 
 class ResourceManager {
-private:
-    Resource* resource;
-
 public:
-    ResourceManager() : resource(new Resource()) {}
+    ResourceManager() : resource(std::make_shared<Resource>()) {} 
+    ~ResourceManager() {}
 
-    ResourceManager(const ResourceManager& other) : resource(new Resource(*(other.resource))) {}
+    double get() {
+        if (resource) {
+            return resource->get(); 
+        }
+        else {
+            throw std::runtime_error("blad inicializacji");
+        }
+    }
 
+    ResourceManager(const ResourceManager& other) : resource(other.resource) {}
     ResourceManager& operator=(const ResourceManager& other) {
-        if (this == &other) {
-            return *this;
+        if (this != &other) {
+            resource = other.resource;
         }
-        delete resource;
-        resource = new Resource(*(other.resource));
         return *this;
     }
 
-    ResourceManager(ResourceManager&& other) noexcept : resource(other.resource) {
-        other.resource = nullptr;
-    }
-
+    ResourceManager(ResourceManager&& other) noexcept : resource(std::move(other.resource)) {}
     ResourceManager& operator=(ResourceManager&& other) noexcept {
-        if (this == &other) {
-            return *this;
+        if (this != &other) {
+            resource = std::move(other.resource);
         }
-        delete resource;
-        resource = other.resource;
-        other.resource = nullptr;
         return *this;
     }
-
-    ~ResourceManager() {
-        delete resource;
-    }
-
-    double get() const {
-        return resource->get();
-    }
-}
+    
+private:
+    std::shared_ptr<Resource> resource; // Test wskaźnika inteligentnego
+};
